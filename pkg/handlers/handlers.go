@@ -32,6 +32,14 @@ func CreateMusic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, item := range mocks.Playlist {
+		if item.Name == m.Name {
+			w.WriteHeader(400)
+			w.Write([]byte("song already exist"))
+			return
+		}
+	}
+
 	m.ID = counter
 	counter++
 	mocks.Playlist = append(mocks.Playlist, m)
