@@ -38,16 +38,16 @@ func main() {
 
 func validateSong(s *song) error {
 	if s.Name == "" {
-		return errors.New("o nome não pode ser vazio")
+		return errors.New("the name cannot be empty")
 	}
 	if s.Album == "" {
-		return errors.New("o album não pode ser vazio")
+		return errors.New("the album cannot be empty")
 	}
 	if len(s.Year) < 3 {
-		return errors.New("o ano deve possuir mais que 3 caracteres")
+		return errors.New("the year must have more than 3 characters")
 	}
 	if s.Singer == "" {
-		return errors.New("o nome do cantor não pode ser vazio")
+		return errors.New("the singer's name cannot be empty")
 	}
 	return nil
 }
@@ -72,6 +72,14 @@ func createSong(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 		return
+	}
+
+	for _, item := range database {
+		if item.Name == s.Name {
+			w.WriteHeader(400)
+			w.Write([]byte("song already exist"))
+			return
+		}
 	}
 
 	database[s.Name] = s
@@ -116,13 +124,13 @@ func putSong(w http.ResponseWriter, r *http.Request) {
 	_, ok := database[s.Name]
 	if !ok {
 		w.WriteHeader(400)
-		w.Write([]byte("music not found"))
+		w.Write([]byte("song not found"))
 		return
 	}
 
 	if s.Name == "" {
 		w.WriteHeader(400)
-		w.Write([]byte("o nome não pode ser vazio"))
+		w.Write([]byte("the name cannot be empty"))
 		return
 	}
 
@@ -147,7 +155,7 @@ func deleteSong(w http.ResponseWriter, r *http.Request) {
 	_, ok := database[SongName]
 	if !ok {
 		w.WriteHeader(400)
-		w.Write([]byte("music not found"))
+		w.Write([]byte("song not found"))
 		return
 	}
 
