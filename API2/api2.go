@@ -61,6 +61,15 @@ func createSong(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var s song
 	_ = json.NewDecoder(r.Body).Decode(&s)
+
+	for _, item := range playlist {
+		if item.Name == s.Name {
+			w.WriteHeader(400)
+			w.Write([]byte("song already exist"))
+			return
+		}
+	}
+
 	playlist = append(playlist, s)
 	json.NewEncoder(w).Encode(playlist)
 }
