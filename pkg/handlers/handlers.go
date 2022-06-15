@@ -3,10 +3,12 @@ package handlers
 import (
 	"Estudos/API/pkg/mocks"
 	"Estudos/API/pkg/models"
+	"Estudos/API/pkg/redisconn"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -30,6 +32,14 @@ func CreateMusic(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
+	}
+
+	red := redisconn.GetRedisConnection()
+	_, err = red.SetNX(m.Name, body, 180*time.Second).Result()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+
 	}
 
 	for _, item := range mocks.Playlist {
@@ -58,6 +68,7 @@ func GetPlaylist(w http.ResponseWriter, r *http.Request) {
 
 func GetMusic(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	var m models.Music
 
 	for _, music := range mocks.Playlist {
 		if music.Name == vars["name"] {
@@ -66,6 +77,14 @@ func GetMusic(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(music)
 			break
 		}
+	}
+
+	red := redisconn.GetRedisConnection()
+	_, err := red.Get(m.Name).Result()
+	if err != nil {
+		http.Error(w, "Error!", 404)
+		return
+
 	}
 }
 
